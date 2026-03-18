@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LearnSphere — Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-page">
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">⬡</div>
+    <span class="brand-name">LearnSphere</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-view="overview"><span class="nav-icon">⊞</span> Overview</a>
+    <a href="#" class="nav-item" data-view="courses"><span class="nav-icon">📚</span> Courses</a>
+    <a href="#" class="nav-item" data-view="schedule"><span class="nav-icon">📅</span> Schedule</a>
+    <a href="#" class="nav-item" data-view="analytics"><span class="nav-icon">📊</span> Analytics</a>
+    <a href="#" class="nav-item" data-view="enrolled"><span class="nav-icon">✓</span> My Courses</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="btn-logout" onclick="logout()">← Logout</button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main-wrapper">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="globalSearch" placeholder="Search courses, skills, careers..." oninput="handleSearchDebounce(this.value)">
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-icon" onclick="toggleDark()" title="Toggle dark mode" id="themeBtn">🌙</button>
+      <div class="notification-bell" onclick="toggleNotifications()">
+        🔔 <span class="notif-badge" id="notifBadge">3</span>
+      </div>
+      <div class="avatar-btn" id="avatarBtn">A</div>
+    </div>
+  </header>
+
+  <!-- Notification Drawer -->
+  <div class="notif-drawer" id="notifDrawer">
+    <div class="notif-header">Notifications <button onclick="clearNotifs()">Clear all</button></div>
+    <div id="notifList"></div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer"></div>
+
+  <!-- Views -->
+  <main class="content-area">
+
+    <!-- INTERESTS MODAL -->
+    <div class="modal-overlay" id="interestsModal">
+      <div class="modal-card">
+        <div class="modal-brand">⬡ LearnSphere</div>
+        <h2>What do you want to learn?</h2>
+        <p>Pick your interests — we'll build your personalized course library.</p>
+        <div class="interests-grid" id="interestsPicker"></div>
+        <button class="btn-primary btn-full" onclick="saveInterests()">Build My Dashboard →</button>
+      </div>
+    </div>
+
+    <!-- OVERVIEW VIEW -->
+    <div class="view active" id="view-overview">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Good day, <span id="userName">Student</span> 👋</h1>
+          <p class="view-sub">Here's what's happening with your learning journey</p>
+        </div>
+        <button class="btn-secondary" onclick="document.getElementById('interestsModal').style.display='flex'">✦ Edit Interests</button>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-grid">
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">📚</div>
+          <div><span class="stat-number" id="enrolledCount">0</span><label>Enrolled</label></div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon">⏱</div>
+          <div><span class="stat-number" id="hoursCount">0h</span><label>This Week</label></div>
+        </div>
+        <div class="stat-card stat-amber">
+          <div class="stat-icon">🏆</div>
+          <div><span class="stat-number" id="completedCount">0</span><label>Completed</label></div>
+        </div>
+        <div class="stat-card stat-purple">
+          <div class="stat-icon">🎯</div>
+          <div><span class="stat-number" id="progressAvg">0%</span><label>Avg Progress</label></div>
+        </div>
+      </div>
+
+      <!-- Skill Growth chart -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <h3>Skill Growth</h3>
+          <canvas id="skillChart" height="180"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Weekly Learning Time</h3>
+          <canvas id="timeChart" height="180"></canvas>
+        </div>
+      </div>
+
+      <!-- Recommended -->
+      <div class="section-header">
+        <h2>✦ Recommended for you</h2>
+        <button class="btn-link" onclick="switchView('courses')">See all →</button>
+      </div>
+      <div class="courses-grid" id="recommendedCourses"></div>
+    </div>
+
+    <!-- COURSES VIEW -->
+    <div class="view" id="view-courses">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Course Library</h1>
+          <p class="view-sub">Browse, filter, and enroll in courses</p>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-tags" id="interestTags"></div>
+        <div class="filter-controls">
+          <select id="filterDifficulty" onchange="applyFilters()">
+            <option value="">All Levels</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+          <select id="filterDuration" onchange="applyFilters()">
+            <option value="">All Durations</option>
+            <option value="short">Short (≤4 wks)</option>
+            <option value="medium">Medium (5–8 wks)</option>
+            <option value="long">Long (9+ wks)</option>
+          </select>
+          <button class="btn-ghost" onclick="clearFilters()">✕ Clear</button>
+        </div>
+      </div>
+      <div class="courses-grid" id="courseGrid"></div>
+    </div>
+
+    <!-- SCHEDULE VIEW -->
+    <div class="view" id="view-schedule">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Smart Schedule</h1>
+          <p class="view-sub">AI-optimized timetable with conflict detection</p>
+        </div>
+        <button class="btn-secondary" onclick="regenerateSchedule()">⟳ Regenerate</button>
+      </div>
+      <div id="scheduleWarnings"></div>
+      <div class="schedule-wrap" id="scheduleWrap"></div>
+    </div>
+
+    <!-- ANALYTICS VIEW -->
+    <div class="view" id="view-analytics">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Analytics</h1>
+          <p class="view-sub">Track your learning performance</p>
+        </div>
+      </div>
+      <div class="analytics-grid" id="analyticsGrid"></div>
+      <div class="charts-row">
+        <div class="chart-card wide">
+          <h3>Course Progress Overview</h3>
+          <canvas id="progressChart" height="120"></canvas>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <h3>Completion Prediction</h3>
+          <canvas id="predictionChart" height="180"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Difficulty Distribution</h3>
+          <canvas id="diffChart" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY COURSES VIEW -->
+    <div class="view" id="view-enrolled">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">My Courses</h1>
+          <p class="view-sub">Your enrolled courses and progress</p>
+        </div>
+      </div>
+      <div class="enrolled-list" id="enrolledList"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- AI Chat Assistant -->
+<div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
+  <span class="chat-bubble-icon">🤖</span>
+  <span class="chat-pulse"></span>
+</div>
+
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <div class="chat-avatar">🤖</div>
+    <div>
+      <strong>Sphere AI</strong>
+      <span class="chat-status">● Online</span>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-msg ai">
+      <div class="msg-bubble">Hi! I'm Sphere AI 👋 I can help you:<br>
+      • Suggest courses for your goals<br>
+      • Plan your learning path<br>
+      • Answer career questions<br><br>
+      Try: <em>"Suggest courses for me"</em> or <em>"What jobs after Python?"</em></div>
+    </div>
+  </div>
+  <div class="chat-quick-actions">
+    <button onclick="sendQuick('Suggest courses for me')">💡 Suggest courses</button>
+    <button onclick="sendQuick('Plan my learning path')">🗺 Learning path</button>
+    <button onclick="sendQuick('What jobs can I get?')">💼 Career options</button>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Ask Sphere AI anything..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">↑</button>
+  </div>
+</div>
+
+<!-- Course Detail Modal -->
+<div class="modal-overlay" id="courseModal" style="display:none">
+  <div class="modal-card course-modal" id="courseModalContent"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

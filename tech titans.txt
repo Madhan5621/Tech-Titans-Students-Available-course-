@@ -1,0 +1,58 @@
+Create a responsive educational platform website using HTML, CSS, and JavaScript with the following requirements:
+
+1. Pages:
+   - Login Page:
+     - Simple authentication form (email & password)
+     - Clean modern UI
+     - Validate inputs using JavaScript
+   - Student Dashboard:
+     - Display student profile and interests
+     - Allow students to select multiple courses
+
+2. Student Flow:
+   - After login, collect student interests (e.g., Coding, Graphic Designing, UI/UX)
+   - Based on selected interests, dynamically display relevant courses
+   - Allow multiple course selection, but prevent duplicate course enrollment
+
+3. Course Features:
+   - Each course should include:
+     - Course title
+     - Description
+     - Duration
+     - Difficulty level
+     - Career opportunities (jobs related to the course)
+   - Show course availability dynamically
+
+4. Enrollment Logic:
+   - Prevent students from selecting the same course more than once
+   - Show selected courses list clearly
+   - Allow removing a course from selection
+
+5. Smart Schedule System:
+   - Generate a simple schedule/timetable for selected courses
+   - Avoid time conflicts
+   - Display schedule in a clean UI (table or cards)
+
+6. UI/UX Requirements:
+   - Modern, responsive design (mobile + desktop)
+   - Use CSS Flexbox/Grid
+   - Add smooth transitions and hover effects
+   - Dashboard should look like a real SaaS product
+
+7. JavaScript Functionality:
+   - DOM manipulation for course rendering
+   - Event handling for selections
+   - LocalStorage to store user data and selected courses
+   - Basic state management (no frameworks)
+
+8. Bonus Features (optional but preferred):
+   - Search and filter courses
+   - Progress tracking UI
+   - Dark mode toggle
+
+9. Code Structure:
+   - Separate files: index.html (login), dashboard.html, style.css, script.js
+   - Clean, well-commented, beginner-friendly but scalable code
+
+Goal:
+Build a functional frontend prototype of a course enrollment platform that prevents duplicate enrollments, recommends courses based on interests, and generates a simple schedule for students.
